@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jeu de Devinette de Mot</title>
+
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-800 flex flex-col items-center justify-center min-h-screen">
+
+<div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md text-center">
+    <h1 class="text-3xl font-bold mb-4">Jeu de Devinette de Mot</h1>
+    <p class="mb-4">Devinez le mot secret lettre par lettre ou entier !</p>
+    
+    <p id="wordDisplay" class="text-2xl font-mono mb-4 tracking-widest"></p>
+
+    <input type="text" id="letterInput" maxlength="1" placeholder="Entrez une lettre"
+           class="input input-bordered w-full mb-2 p-2 rounded-lg">
+    <button id="guessBtn" class="btn btn-primary w-full mb-2">Deviner</button>
+
+    <p id="wrongLetters" class="mb-2 text-red-500"></p>
+    <p id="attempts" class="mb-4"></p>
+
+    <button id="restartBtn" class="btn btn-secondary w-full hidden">Rejouer</button>
+</div>
+
+<script>
+const words = ["maradi", "niger", "voiture", "ordinateur", "javascript", "tailwind", "drapeau", "pays"];
+let selectedWord = '';
+let guessedLetters = [];
+let attemptsLeft = 6;
+
+const wordDisplay = document.getElementById('wordDisplay');
+const letterInput = document.getElementById('letterInput');
+const guessBtn = document.getElementById('guessBtn');
+const wrongLetters = document.getElementById('wrongLetters');
+const attempts = document.getElementById('attempts');
+const restartBtn = document.getElementById('restartBtn');
+
+function startGame() {
+    selectedWord = words[Math.floor(Math.random() * words.length)].toLowerCase();
+    guessedLetters = [];
+    attemptsLeft = 6;
+    updateDisplay();
+    wrongLetters.textContent = '';
+    attempts.textContent = `Tentatives restantes : ${attemptsLeft}`;
+    letterInput.disabled = false;
+    guessBtn.disabled = false;
+    restartBtn.classList.add('hidden');
+}
+
+function updateDisplay() {
+    let display = '';
+    for (let char of selectedWord) {
+        display += guessedLetters.includes(char) ? char + ' ' : '_ ';
+    }
+    wordDisplay.textContent = display.trim();
+}
+
+function checkGuess() {
+    const guess = letterInput.value.toLowerCase();
+    if (!guess || guessedLetters.includes(guess)) {
+        letterInput.value = '';
+        return;
+    }
+
+    if (selectedWord.includes(guess)) {
+        guessedLetters.push(guess);
+    } else {
+        guessedLetters.push(guess);
+        attemptsLeft--;
+        wrongLetters.textContent = "Lettres incorrectes : " + guessedLetters.filter(l=>!selectedWord.includes(l)).join(', ');
+        attempts.textContent = `Tentatives restantes : ${attemptsLeft}`;
+    }
+    updateDisplay();
+    letterInput.value = '';
+
+    checkGameOver();
+}
+
+function checkGameOver() {
+    if (!wordDisplay.textContent.includes('_')) {
+        alert(`Bravo ! Vous avez deviné le mot : ${selectedWord.toUpperCase()}`);
+        endGame();
+    } else if (attemptsLeft <= 0) {
+        alert(`Perdu ! Le mot était : ${selectedWord.toUpperCase()}`);
+        endGame();
+    }
+}
+
+function endGame() {
+    letterInput.disabled = true;
+    guessBtn.disabled = true;
+    restartBtn.classList.remove('hidden');
+}
+
+guessBtn.addEventListener('click', checkGuess);
+letterInput.addEventListener('keypress', function(e){
+    if(e.key==='Enter') checkGuess();
+});
+restartBtn.addEventListener('click', startGame);
+
+// Lancer le jeu au départ
+startGame();
+</script>
+
+</body>
+</html>
